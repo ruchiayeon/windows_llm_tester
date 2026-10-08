@@ -23,3 +23,12 @@ hint_after_rejections = 3
 saturate_after_rejections = 5
 similar_top_k = 3
 hint_limit = 5
+
+# 테스트 대상 설치 파일 허용 목록. Worker는 여기 등록된 파일만, 해시가 맞을 때만 VM에 설치한다.
+# Claude는 경로·인자를 정할 수 없고, 필요하면 키 이름만 고른다.
+[installers."savex-1.16.0.19"]
+path = "test_target_file/savex_가연_테스트중_20ep_v1.16.0.19.exe"
+sha256 = "7fc06dc68ad84366d731e194cce0053421df6030bced47167663e41b15ccf3df"
+args = []                     # 자동설치 버전이라 추가 인자 없음
+timeout_s = 900
+success_codes = [0, 3010]     # 3010: 성공, 재부팅 필요

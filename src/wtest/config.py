@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import tomllib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -27,12 +27,25 @@ class PolicyConfig:
 
 
 @dataclass(frozen=True)
+class InstallerConfig:
+    """테스트 대상 설치 파일 하나. Worker만 사용하며 Claude에게는 키 이름만 노출한다."""
+
+    key: str
+    path: Path
+    sha256: str
+    args: tuple[str, ...] = ()
+    timeout_s: int = 900
+    success_codes: tuple[int, ...] = (0, 3010)
+
+
+@dataclass(frozen=True)
 class Config:
     db_path: Path
     busy_timeout_ms: int
     catalog_path: Path
     similarity: SimilarityConfig
     policy: PolicyConfig
+    installers: dict[str, InstallerConfig] = field(default_factory=dict)
 
 
 def load_config(path: str | Path | None = None) -> Config:
@@ -51,4 +64,18 @@ def load_config(path: str | Path | None = None) -> Config:
         catalog_path=catalog_path if catalog_path.is_absolute() else base / catalog_path,
         similarity=SimilarityConfig(**raw.get("similarity", {})),
         policy=PolicyConfig(**raw.get("policy", {})),
+        installers={key: _installer(key, body, base) for key, body in raw.get("installers", {}).items()},
+    )
+
+
+def _installer(key: str, body: dict, base: Path) -> InstallerConfig:
+    """설치 파일 항목을 읽는다. 상대 경로는 설정 파일 위치 기준으로 바꾼다."""
+    path = Path(body["path"])
+    return InstallerConfig(
+        key=key,
+        path=path if path.is_absolute() else base / path,
+        sha256=str(body["sha256"]).lower(),
+        args=tuple(str(a) for a in body.get("args", ())),
+        timeout_s=int(body.get("timeout_s", 900)),
+        success_codes=tuple(int(c) for c in body.get("success_codes", (0, 3010))),
     )
