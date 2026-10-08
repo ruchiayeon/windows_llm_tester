@@ -1,0 +1,80 @@
+# 액션 카탈로그. 여기에 없는 동작은 vm_action / vm_query로 실행할 수 없다 (§10).
+#
+# kind            : action(상태 변경) | query(읽기 전용)
+# signature_params: 구조 시그니처에 남기는 파라미터 (나머지 값은 제거, §6)
+# class_params    : value_classes=true일 때 normal/boundary/invalid로 분류할 수치 파라미터
+# params          : 이름 = { type = "str|int|bool", required = bool, min, max }
+
+[set_config]
+kind = "action"
+category = "config"
+description = "에이전트 설정 키 값을 변경한다"
+signature_params = ["key"]
+class_params = ["value"]
+params.key = { type = "str", required = true }
+params.value = { type = "int", required = true, min = 0, max = 3600 }
+
+[restart_service]
+kind = "action"
+category = "service"
+description = "서비스를 재시작한다"
+params.svc = { type = "str", required = true }
+
+[stop_service]
+kind = "action"
+category = "service"
+description = "서비스를 중지한다"
+params.svc = { type = "str", required = true }
+
+[start_service]
+kind = "action"
+category = "service"
+description = "서비스를 시작한다"
+params.svc = { type = "str", required = true }
+
+[kill_process]
+kind = "action"
+category = "process"
+description = "프로세스를 강제 종료한다"
+params.name = { type = "str", required = true }
+
+[block_network]
+kind = "action"
+category = "network"
+description = "지정 포트의 아웃바운드 통신을 차단한다"
+class_params = ["port"]
+params.port = { type = "int", required = true, min = 1, max = 65535 }
+
+[unblock_network]
+kind = "action"
+category = "network"
+description = "네트워크 차단을 모두 해제한다"
+
+[wait]
+kind = "action"
+category = "control"
+description = "지정 초만큼 대기한다"
+class_params = ["seconds"]
+params.seconds = { type = "int", required = true, min = 1, max = 600 }
+
+[service_status]
+kind = "query"
+category = "service"
+description = "서비스 상태를 조회한다"
+params.svc = { type = "str", required = true }
+
+[process_list]
+kind = "query"
+category = "process"
+description = "실행 중인 프로세스 목록을 조회한다"
+
+[port_list]
+kind = "query"
+category = "network"
+description = "열린 포트와 차단 포트를 조회한다"
+
+[get_config]
+kind = "query"
+category = "config"
+description = "에이전트 설정 값을 조회한다"
+params.key = { type = "str", required = false }

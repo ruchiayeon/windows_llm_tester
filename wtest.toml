@@ -1,0 +1,25 @@
+# wtest 설정 (architecture.md §6: 임계값 · 가중치 · 값 경계 클래스는 설정 파일로 관리)
+
+[db]
+path = "data/coverage.db"
+busy_timeout_ms = 30000
+
+[catalog]
+path = "catalog/actions.toml"
+
+[similarity]
+threshold = 0.7
+w_steps = 0.6
+w_preconditions = 0.2
+w_criteria = 0.2
+# true면 수치 파라미터를 normal / boundary / invalid 클래스로 시그니처에 포함
+value_classes = false
+
+[policy]
+# INCONCLUSIVE 결과를 다시 승인할 수 있는 최대 재시도 횟수
+max_retries = 2
+# 세션 내 거절 횟수에 따른 안내 (§5 행동 루프)
+hint_after_rejections = 3
+saturate_after_rejections = 5
+similar_top_k = 3
+hint_limit = 5
