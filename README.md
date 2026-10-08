@@ -17,6 +17,21 @@ Windows 에이전트 병렬 자동 테스트. 설계는 [docs/architecture.md](d
 | `src/wtest/server.py` | stdio MCP 서버 (`MCPServer`, mcp 2.x) |
 | `src/wtest/vm.py` | `VMGuard`(카탈로그 검증) + `FakeVM`. Hyper-V 백엔드는 M2 |
 
+## 골든 이미지 만들기 (처음 한 번, 관리자 콘솔)
+
+1. Windows 11 Enterprise 평가판 ISO(한국어)를 `images\`에 넣는다.
+2. **관리자 PowerShell**에서 실행한다 (10~30분):
+   ```powershell
+   cd D:\DocStory\test
+   powershell -ExecutionPolicy Bypass -File scripts\build_base.ps1
+   ```
+3. 결과물
+   - `data\vms\base\base.vhdx`: 읽기 전용 원본. 테스트 VM은 이것의 차등 디스크로 자동 생성된다
+   - `data\vms\base\base.json`: 빌드 정보 (MachineGuid, 평가판 만료일, 서버 접속 여부)
+   - `data\guest-cred.xml`: VM 관리자 자격 증명 (DPAPI, 빌드한 Windows 사용자만 해독 가능)
+
+평가판은 90일이므로 만료 전에 `-Force`로 다시 만든다.
+
 ## 사용
 
 ```powershell
@@ -24,8 +39,8 @@ uv sync
 uv run wtest init                                   # data/coverage.db 생성 + 카탈로그 적재
 uv run wtest new-run run-001 --agent-version 1.0.0
 uv run wtest mcp-config --run run-001 --worker w1 --vm run-01 > mcp-w1.json
-# --tools "" 로 내장 도구(Bash · PowerShell · Edit · Write 등)를 모두 제거하고 wtest MCP 도구만 남긴다 (§10)
-claude -p "탐색 과제: ..." --mcp-config mcp-w1.json --strict-mcp-config --tools "" --allowedTools "mcp__wtest__*"
+# --tools= 로 내장 도구(Bash · PowerShell · Edit · Write 등)를 모두 제거하고 wtest MCP 도구만 남긴다 (§10)
+claude -p "탐색 과제: ..." --mcp-config mcp-w1.json --strict-mcp-config --tools= --allowedTools mcp__wtest
 uv run wtest status --run run-001
 ```
 

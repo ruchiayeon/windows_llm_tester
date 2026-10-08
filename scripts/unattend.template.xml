@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  골든 이미지 첫 부팅용 무인 설정 (한국어 Windows 11).
+  {{PASSWORD}} 는 build_base.ps1이 무작위 값으로 채워 VHD 안에만 쓴다. 이 템플릿에는 비밀번호가 없다.
+  첫 부팅이 끝나면 build_base.ps1이 VM 안의 사본(Panther\unattend.xml)을 지운다.
+-->
+<unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
+  <settings pass="specialize">
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <ComputerName>WTEST-BASE</ComputerName>
+      <TimeZone>Korea Standard Time</TimeZone>
+    </component>
+  </settings>
+  <settings pass="oobeSystem">
+    <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <InputLocale>0412:00000412</InputLocale>
+      <SystemLocale>ko-KR</SystemLocale>
+      <UILanguage>ko-KR</UILanguage>
+      <UserLocale>ko-KR</UserLocale>
+    </component>
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <OOBE>
+        <HideEULAPage>true</HideEULAPage>
+        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+        <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+        <HideLocalAccountScreen>true</HideLocalAccountScreen>
+        <ProtectYourPC>3</ProtectYourPC>
+      </OOBE>
+      <UserAccounts>
+        <LocalAccounts>
+          <LocalAccount wcm:action="add">
+            <Name>wtest</Name>
+            <Group>Administrators</Group>
+            <Password>
+              <Value>{{PASSWORD}}</Value>
+              <PlainText>true</PlainText>
+            </Password>
+          </LocalAccount>
+        </LocalAccounts>
+      </UserAccounts>
+      <TimeZone>Korea Standard Time</TimeZone>
+    </component>
+  </settings>
+</unattend>

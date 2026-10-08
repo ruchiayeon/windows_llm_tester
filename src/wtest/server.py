@@ -57,10 +57,17 @@ class Scenario(BaseModel):
 
 def build_server(session: Session) -> MCPServer:
     mcp = MCPServer("wtest", instructions=INSTRUCTIONS)
-    # 한 세션의 도구 호출은 한 번에 하나씩: sqlite 연결과 세션 상태(CHK, 커서)를 공유하기 때문
+    # 세션 락: sqlite 연결과 세션 상태(CHK, 커서)를 보호한다.
+    # VM 호출은 수십 초 걸릴 수 있고 외부 프로세스를 부르므로 락 밖에서 실행한다 (규칙 7.2).
+    # VM 도구는 세션 상태를 건드리지 않으므로 락 없이도 안전하다.
     lock = threading.Lock()
 
+    def wrap(result: Any) -> dict[str, Any]:
+        with lock:
+            return {"result": result, "new_findings": session.new_findings()}
+
     def call(fn: Callable[[], Any]) -> dict[str, Any]:
+        """DB·세션 상태를 쓰는 도구: 실행부터 편승까지 세션 락 안에서."""
         with lock:
             try:
                 result = fn()
@@ -68,26 +75,34 @@ def build_server(session: Session) -> MCPServer:
                 raise ToolError(str(e)) from e
             return {"result": result, "new_findings": session.new_findings()}
 
+    def call_vm(fn: Callable[[], Any]) -> dict[str, Any]:
+        """VM 도구: 실행은 락 밖, 편승 조회만 락 안에서."""
+        try:
+            result = fn()
+        except (CatalogError, ValueError) as e:
+            raise ToolError(str(e)) from e
+        return wrap(result)
+
     # ---- VM 도구 (WTEST_VM에 고정) ------------------------------------------------
     @mcp.tool()
     def vm_action(action: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """자기 VM에서 카탈로그의 상태 변경 액션을 실행한다. 카탈로그 밖 액션은 거부된다."""
-        return call(lambda: session.vm.action(action, params))
+        return call_vm(lambda: session.vm.action(action, params))
 
     @mcp.tool()
     def vm_query(query: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """자기 VM의 상태를 읽기 전용으로 조회한다 (service_status, process_list, port_list, get_config 등)."""
-        return call(lambda: session.vm.query(query, params))
+        return call_vm(lambda: session.vm.query(query, params))
 
     @mcp.tool()
     def vm_read_log(source: Literal["app", "System", "Application"], max_lines: int = 50) -> dict[str, Any]:
         """자기 VM의 로그 마지막 N줄을 읽는다."""
-        return call(lambda: session.vm.read_log(source, max_lines))
+        return call_vm(lambda: session.vm.read_log(source, max_lines))
 
     @mcp.tool()
     def vm_screenshot() -> dict[str, Any]:
         """자기 VM 화면을 캡처한다 (GUI 시나리오용)."""
-        return call(session.vm.screenshot)
+        return call_vm(session.vm.screenshot)
 
     # ---- 지식 조회 (RAG) ---------------------------------------------------------
     @mcp.tool()

@@ -54,7 +54,8 @@ def propose_test(
                 result["retry_reason"] = _retry_reason(conn, cfg, retry_of)
             return result
 
-        assert best is not None  # blocking이 있으면 후보도 있다
+        if best is None:  # blocking이 있으면 후보도 있다. 깨졌다면 판정 로직 버그
+            raise RuntimeError("거절 판정인데 비교 후보가 없음")
         _log_proposal(conn, run_id, worker_id, sig, best, best_score, "rejected", None)
         top = scored[: cfg.policy.similar_top_k]
         return {

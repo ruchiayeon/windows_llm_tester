@@ -448,5 +448,5 @@ flowchart LR
 | 테스트 대상 에이전트 형태 (GUI · 서비스 · 드라이버) | 미정. UI 자동화와 커널 수집 범위가 여기에 따라 결정됨 |
 | 골든 이미지 확보 방법 (평가판 ISO · 사내 이미지) | 미정 |
 | 호스트 RAM, 즉 병렬 VM 수 | 미정 (VM당 약 4GB 가정) |
-| Claude 연결 방식 | M1~M2는 `claude -p --strict-mcp-config --tools "" --allowedTools "mcp__wtest__*"`(M1 스모크 확인), 이후 Agent SDK 전환 검토 |
+| Claude 연결 방식 | M1~M2는 `claude -p --strict-mcp-config --tools= --allowedTools mcp__wtest`(M1 스모크 확인), 이후 Agent SDK 전환 검토 |
 | 임베딩 모델 | 로컬 다국어 모델 (M5에서 확정) |

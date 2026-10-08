@@ -7,3 +7,6 @@ reports/
 
 # 테스트 대상 설치 파일: 용량이 크고 라이선스 파일이 들어 있어 저장소에 올리지 않는다
 test_target_file/
+
+# Windows ISO · 골든 이미지: 수 GB라 저장소에 올리지 않는다
+images/

@@ -1,0 +1,19 @@
+﻿{
+  "mcpServers": {
+    "wtest": {
+      "command": "D:\\DocStory\\test\\.venv\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "wtest",
+        "mcp"
+      ],
+      "env": {
+        "WTEST_CONFIG": "D:\\DocStory\\test\\wtest.toml",
+        "WTEST_RUN": "run-001",
+        "WTEST_WORKER": "w1",
+        "WTEST_VM": "run-01",
+        "WTEST_BACKEND": "fake"
+      }
+    }
+  }
+}
